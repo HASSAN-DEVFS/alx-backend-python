@@ -48,7 +48,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+<<<<<<< HEAD
      'chats.middleware.RequestLoggingMiddleware',
+=======
+     'chats.middleware.RestrictAccessByTimeMiddleware', 
+>>>>>>> cce28c8 (Regler un erreur de middelware)
 ]
 
 ROOT_URLCONF = 'config.urls'
