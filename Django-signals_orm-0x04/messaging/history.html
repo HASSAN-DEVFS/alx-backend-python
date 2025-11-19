@@ -1,0 +1,9 @@
+<h1>History of message</h1>
+
+{% for h in history %}
+    <p><strong>Old content:</strong> {{ h.old_content }}</p>
+    <p><strong>Edited at:</strong> {{ h.edited_at }}</p>
+    <hr>
+{% empty %}
+    <p>No edits found.</p>
+{% endfor %}

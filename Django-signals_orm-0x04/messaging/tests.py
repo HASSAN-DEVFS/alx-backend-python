@@ -1,32 +1,25 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
-from .models import Message, Notification
+from .models import Message, MessageHistory, Notification
 
-class MessagingSignalsTest(TestCase):
+
+class MessagingTests(TestCase):
+
     def setUp(self):
-        self.sender = User.objects.create_user(username="alice", password="test123")
-        self.receiver = User.objects.create_user(username="bob", password="test123")
+        self.user1 = User.objects.create(username="user1")
+        self.user2 = User.objects.create(username="user2")
 
-    def test_notification_created_on_message(self):
-        """
-        Vérifie que lorsqu'un Message est créé,
-        une Notification est automatiquement générée.
-        """
-        msg = Message.objects.create(
-            sender=self.sender,
-            receiver=self.receiver,
-            content="Hello Bob!"
-        )
-        notification = Notification.objects.filter(message=msg).first()
-        self.assertIsNotNone(notification)
-        self.assertEqual(notification.user, self.receiver)
-        self.assertFalse(notification.is_read)
+    def test_message_creation_creates_notification(self):
+        msg = Message.objects.create(sender=self.user1, receiver=self.user2, content="Hello")
+        self.assertEqual(Notification.objects.filter(user=self.user2).count(), 1)
 
-    def test_multiple_notifications(self):
-        """
-        Vérifie que plusieurs messages créent plusieurs notifications.
-        """
-        msg1 = Message.objects.create(sender=self.sender, receiver=self.receiver, content="Hi 1")
-        msg2 = Message.objects.create(sender=self.sender, receiver=self.receiver, content="Hi 2")
-        notifications = Notification.objects.filter(user=self.receiver)
-        self.assertEqual(notifications.count(), 2)
+    def test_edit_message_creates_history(self):
+        msg = Message.objects.create(sender=self.user1, receiver=self.user2, content="Hello")
+        msg.content = "Edited"
+        msg.save()
+        self.assertEqual(MessageHistory.objects.filter(message=msg).count(), 1)
+
+    def test_user_delete_cleans_related_data(self):
+        Message.objects.create(sender=self.user1, receiver=self.user2, content="Hello")
+        self.user1.delete()
+        self.assertEqual(Message.objects.count(), 0)
